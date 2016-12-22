@@ -1,16 +1,16 @@
 from xml.dom import minidom
-from .definitions.Elements import *
-from .definitions.Diagram import Diagram
-from .definitions.ItemDefinition import ItemDefinition
-from .definitions.Requirements import *
-from .definitions.Logic import *
+from definitions.Elements import *
+from definitions.Model import Model
+from definitions.ItemDefinition import ItemDefinition
+from definitions.Requirements import *
+from definitions.Logic import *
 
 class DMNImport:
 
     @staticmethod
-    def load_diagram_from_xml(file_path):
+    def load_model_from_xml(file_path):
         DMNImport.xml_doc = minidom.parse(file_path)
-        DMNImport.diagram = Diagram()
+        DMNImport.model = Model()
         DMNImport.import_header()
         DMNImport.import_item_definition()
         DMNImport.import_input_data_elem()
@@ -18,7 +18,7 @@ class DMNImport:
         DMNImport.import_business_knowledge_model_elem()
         DMNImport.import_decision_elem()
         DMNImport.import_requirement()
-        return DMNImport.diagram
+        return DMNImport.model
 
     ##############################################################
     
@@ -26,11 +26,11 @@ class DMNImport:
     @staticmethod
     def import_header():
         header = DMNImport.get_first_element_by_tag(DMNImport.xml_doc, 'definitions')
-        DMNImport.get_name_id(header, DMNImport.diagram)
-        DMNImport.diagram.namespace = DMNImport.get_attribute_value(header, 'namespace')
-        DMNImport.diagram.xmlns = DMNImport.get_attribute_value(header, 'xmlns')
-        DMNImport.diagram.xmlnsex = DMNImport.get_attribute_value(header, 'xmlns:ex')
-        DMNImport.diagram.description = DMNImport.get_value_by_tag(DMNImport.xml_doc, 'description')
+        DMNImport.get_name_id(header, DMNImport.model)
+        DMNImport.model.namespace = DMNImport.get_attribute_value(header, 'namespace')
+        DMNImport.model.xmlns = DMNImport.get_attribute_value(header, 'xmlns')
+        DMNImport.model.xmlns_ex = DMNImport.get_attribute_value(header, 'xmlns:ex')
+        DMNImport.model.description = DMNImport.get_value_by_tag(DMNImport.xml_doc, 'description')
 
 
     ##############################################################
@@ -44,7 +44,7 @@ class DMNImport:
                 item_def.item_component_list = DMNImport.import_item_component(item)
             else:
                 item_def = DMNImport.import_item_component_type_ref_allowed_values(item, item_def)
-            DMNImport.diagram.add_definition(item_def)
+            DMNImport.model.add_definition(item_def)
 
     @staticmethod
     def import_item_component(xml_node):
@@ -83,14 +83,14 @@ class DMNImport:
         for item in DMNImport.get_list_by_tag(DMNImport.xml_doc, 'inputData'):
             input_data_elem = DMNImport.get_name_id(item, InputDataElement(item))
             input_data_elem.variable = DMNImport.import_input_element_variable(item)
-            DMNImport.diagram.add_element(input_data_elem)
+            DMNImport.model.add_element(input_data_elem)
 
     @staticmethod
     def import_input_element_variable(xml_node):
         variable_item = DMNImport.get_first_element_by_tag(xml_node, 'variable')
         variable = DMNImport.get_name_id(variable_item, InputElementVariable())
         variable.type_ref_value = DMNImport.get_attribute_value(variable_item, 'typeRef')
-        variable.type_ref = DMNImport.diagram.get_definition_by_name(variable.name)
+        variable.type_ref = DMNImport.model.get_definition_by_name(variable.name)
         return variable
 
 
@@ -102,7 +102,7 @@ class DMNImport:
     def import_knowledge_source_elem():
         for item in DMNImport.get_list_by_tag(DMNImport.xml_doc, 'knowledgeSource'):
             knowledge_source_elem = DMNImport.get_name_id(item, KnowledgeSourceElement(item))
-            DMNImport.diagram.add_element(knowledge_source_elem)
+            DMNImport.model.add_element(knowledge_source_elem)
 
 
     ############################################################
@@ -113,7 +113,7 @@ class DMNImport:
         for item in DMNImport.get_list_by_tag(DMNImport.xml_doc, 'businessKnowledgeModel'):
             business_knowledge_elem = DMNImport.get_name_id(item, BusinessKnowledgeModelElement(item))
             business_knowledge_elem = DMNImport.import_logic(item, business_knowledge_elem)
-            DMNImport.diagram.add_element(business_knowledge_elem)
+            DMNImport.model.add_element(business_knowledge_elem)
 
     @staticmethod
     def import_logic(xml_node, business_knowledge_elem):
@@ -174,7 +174,7 @@ class DMNImport:
                 decision_elem.decision_table = DMNImport.import_decision_table(item)
             except IndexError:
                 pass
-            DMNImport.diagram.add_element(decision_elem)
+            DMNImport.model.add_element(decision_elem)
 
     @staticmethod
     def import_decision_element_variable(xml_node):
@@ -234,11 +234,9 @@ class DMNImport:
         for item in DMNImport.get_list_by_tag(xml_node, 'rule'):
             rule = Rule()
             rule_input_list = []
-            i = 0
             for item1 in DMNImport.get_list_by_tag(item, 'inputEntry'):
-                rule_input = RuleInput(decision_table_input_list[i], DMNImport.get_value_by_tag(item1, 'text'))
+                rule_input = DMNImport.get_value_by_tag(item1, 'text')
                 rule_input_list.append(rule_input)
-                i += 1
             rule.output = DMNImport.get_value_by_two_tags(item, 'outputEntry', 'text')
             rule.input_list = rule_input_list
             rule_list.append(rule)
@@ -250,7 +248,7 @@ class DMNImport:
 
     @staticmethod
     def import_requirement():
-        for elem in DMNImport.diagram.element_list:
+        for elem in DMNImport.model.element_list:
             DMNImport.import_requirement_of_elem(elem)
 
 
@@ -268,7 +266,7 @@ class DMNImport:
             elem.information_requirement_list = DMNImport.import_requirement_list(elem.xml_node, 'information')
         except:
             pass
-        DMNImport.add_requirements_to_diagram(elem)
+        DMNImport.add_requirements_to_model(elem)
 
     @staticmethod
     def import_requirement_list(xml_node, requirement_type):
@@ -283,26 +281,26 @@ class DMNImport:
                     requir = DMNImport.get_first_element_by_tag(item, 'requiredKnowledge')
                 elif DMNImport.at_least_one_element_by_tag(item, 'requiredAuthority'):
                     requir = DMNImport.get_first_element_by_tag(item, 'requiredAuthority')
-                requirement_list.append(DMNImport.diagram.get_element_by_id(requir.attributes['href'].value[1:]))
+                requirement_list.append(DMNImport.model.get_element_by_id(requir.attributes['href'].value[1:]))
             except:
                 raise Exception('Can\'t find needed ' + requirement_type + ' requirement')
         return requirement_list
 
     @staticmethod
-    def add_requirements_to_diagram(elem):
+    def add_requirements_to_model(elem):
         try:
             for requirement in elem.authority_requirement_list:
-                DMNImport.diagram.add_requirement(AuthorityRequirement(requirement, elem))
+                DMNImport.model.add_requirement(AuthorityRequirement(requirement, elem))
         except:
             pass
         try:
             for requirement in elem.knowledge_requirement_list:
-                DMNImport.diagram.add_requirement(KnowledgeRequirement(requirement, elem))
+                DMNImport.model.add_requirement(KnowledgeRequirement(requirement, elem))
         except:
             pass
         try:
             for requirement in elem.information_requirement_list:
-                DMNImport.diagram.add_requirement(InformationRequirement(requirement, elem))
+                DMNImport.model.add_requirement(InformationRequirement(requirement, elem))
         except:
             pass
 

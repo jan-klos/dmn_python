@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <definitions namespace="http://www.omg.org/spec/DMN/20151101/ch11example.xml"
-	xmlns:ex="http://www.omg.org/spec/DMN/20151101/ch11example.xml"
-	name="Loan Origination Decision Model" id="LoanOriginationModel"
-	xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd">
+    xmlns:ex="http://www.omg.org/spec/DMN/20151101/ch11example.xml"
+    name="Loan Origination Decision Model" id="LoanOriginationModel"
+    xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd">
     <description>Implements model from chapter 11 of DMN 1.1 spec</description>
     <itemDefinition name="Applicant data" id="applicantData_t">
         <itemComponent name="Age" id="age_t">
@@ -30,6 +30,11 @@
             <itemComponent name="Expenses" id="expenses_t">
                 <typeRef xmlns:ns2="http://www.omg.org/spec/FEEL/20140401">ns2:number</typeRef>
             </itemComponent>
+        </itemComponent>
+    </itemDefinition>
+    <itemDefinition name="Supporting documents" id="supportingDocs_t">
+        <itemComponent name="Document1" id="document1_t">
+            <typeRef xmlns:ns2="http://www.omg.org/spec/FEEL/20140401">ns2:string</typeRef>
         </itemComponent>
     </itemDefinition>
     <itemDefinition name="Bureau data" id="bureauData_t">
@@ -250,6 +255,9 @@
                 </rule>
             </decisionTable>
         </encapsulatedLogic>
+        <knowledgeRequirement>
+            <requiredKnowledge href="#riskManager_ks"/>
+        </knowledgeRequirement>
     </businessKnowledgeModel>
     <businessKnowledgeModel name="Application risk score model" id="applicationRiskScoreModel_bkm">
         <encapsulatedLogic>
@@ -262,7 +270,7 @@
                         <text>Age</text>
                     </inputExpression>
                     <inputValues>
-                        <text>[18..120]</text> dupa
+                        <text>[18..120]</text>
                     </inputValues>
                 </input>
                 <input>
@@ -744,6 +752,9 @@ else false</text>
                 </rule>
             </decisionTable>
         </encapsulatedLogic>
+        <authorityRequirement>
+            <requiredAuthority href="#productSpecification_ks"/>
+        </authorityRequirement>
     </businessKnowledgeModel>
     <businessKnowledgeModel name="Installment calculation" id="installmentCalculation_bkm">
         <encapsulatedLogic>
@@ -987,7 +998,7 @@ else if Product Type = "SPECIAL LOAN" then 25.00
     <decision name="Bureau call type" id="bureauCallType_d">
         <variable typeRef="ns2:string" name="Bureau Call Type" id="bureauCallType_ii" xmlns:ns2="http://www.omg.org/spec/FEEL/20140401"/>
         <informationRequirement>
-            <requiredDecision href="#preBureauRiskCategoryTable_bkm"/>
+            <requiredDecision href="#preBureauRiskCategory_d"/>
         </informationRequirement>
         <knowledgeRequirement>
             <requiredKnowledge href="#bureauCallTypeTable_bkm"/>
@@ -1134,6 +1145,9 @@ else if Product Type = "SPECIAL LOAN" then 25.00
         <knowledgeRequirement>
             <requiredKnowledge href="#applicationRiskScoreModel_bkm"/>
         </knowledgeRequirement>
+        <informationRequirement>
+            <requiredInput href="#applicantData_id"/>
+        </informationRequirement>
         <invocation>
             <literalExpression>
                 <text>Application risk score model</text>
@@ -1211,6 +1225,15 @@ else if Product Type = "SPECIAL LOAN" then 25.00
         <knowledgeRequirement>
             <requiredKnowledge href="#AffordabilityCalculation_bkm"/>
         </knowledgeRequirement>
+        <informationRequirement>
+            <requiredInput href="#applicantData_id"/>
+        </informationRequirement>
+        <informationRequirement>
+            <requiredDecision href="#postBureauRiskCategory_d"/>
+        </informationRequirement>
+        <informationRequirement>
+            <requiredDecision href="#RequiredMonthlyInstallment_d"/>
+        </informationRequirement>
         <invocation>
             <literalExpression>
                 <text>Affordability calculation</text>
@@ -1291,9 +1314,9 @@ else if Product Type = "SPECIAL LOAN" then 25.00
         <informationRequirement>
             <requiredInput href="#bureauData_id"/>
         </informationRequirement>
-        <knowledgeRequirement>
-            <requiredKnowledge href="#postBureauRiskCategoryTable_bkm"/>
-        </knowledgeRequirement>
+        <informationRequirement>
+            <requiredDecision href="#applicationRiskScore_d"/>
+        </informationRequirement>
         <authorityRequirement>
             <requiredAuthority href="#riskManager_ks"/>
         </authorityRequirement>
@@ -1331,9 +1354,9 @@ else if Product Type = "SPECIAL LOAN" then 25.00
         <informationRequirement>
             <requiredInput href="#bureauData_id"/>
         </informationRequirement>
-        <authorityRequirement>
+        <knowledgeRequirement>
             <requiredAuthority href="#routingRules_bkm"/>
-        </authorityRequirement>
+        </knowledgeRequirement>
         <invocation>
             <literalExpression>
                 <text>Routing rules</text>
@@ -1373,6 +1396,9 @@ else if Product Type = "SPECIAL LOAN" then 25.00
         </informationRequirement>
         <informationRequirement>
             <requiredInput href="#supportingDocuments_id"/>
+        </informationRequirement>
+        <informationRequirement>
+            <requiredDecision href="#routing_d"/>
         </informationRequirement>
         <authorityRequirement>
             <requiredAuthority href="#creditOfficer_ks"/>

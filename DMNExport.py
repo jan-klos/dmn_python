@@ -1,49 +1,73 @@
 from lxml.etree import *
-import uuid, html, time
+from definitions.Elements import InputDataElement, BusinessKnowledgeModelElement, DecisionElement, KnowledgeSourceElement
+import uuid, html, time, os
+import xml.etree.ElementTree as ET
 
 class DMNExport:
     class XMLNamespaces:
         xmlns = ''
-        xmlnsex = ''
+        xmlns_ex = ''
         ns2 = ''
 
     @staticmethod
-    def export_to_xml(diagram, output_file = None):
-        DMNExport.generate_header(diagram)
-        DMNExport.generate_item_definition(DMNExport.root, diagram)
-        DMNExport.generate_input_data(DMNExport.root, diagram)
-        DMNExport.generate_knowledge_source(DMNExport.root, diagram)
-        DMNExport.generate_business_knowledge_model(DMNExport.root, diagram)
-        DMNExport.generate_decision(DMNExport.root, diagram)
+    def export_model_to_xml(model, output_file = None):
+        DMNExport.generate_header(model)
+        DMNExport.generate_item_definition(DMNExport.root, model)
+        DMNExport.generate_input_data(DMNExport.root, model)
+        DMNExport.generate_knowledge_source(DMNExport.root, model)
+        DMNExport.generate_business_knowledge_model(DMNExport.root, model)
+        DMNExport.generate_decision(DMNExport.root, model)
+        #DMNExport.indent(DMNExport.root) #indents of four spaces but it's not perfect
         tree = ElementTree(DMNExport.root)
         if output_file == None:
-            filename = 'diagram_' + time.strftime('%d-%m-%Y') + '_' + str(uuid.uuid4())[:8] + '.xml'
+            directory = os.getenv("HOME") + '/dmn_python_outputs/'
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            filename = directory + '/model_' + time.strftime('%d-%m-%Y') + '_' + str(uuid.uuid4())[:4] + '.xml'
         else:
             filename = output_file
         tree.write(filename, pretty_print = True, xml_declaration = True, encoding = 'utf-8', standalone = 'yes')
 
+    @staticmethod
+    def indent(elem, level = 0):
+        i = '\n' + level * '    '
+        j = '\n' + (level - 1) * '    '
+        if len(elem):
+            if not elem.text or not elem.text.strip():
+                elem.text = i + '    '
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = i
+            for subelem in elem:
+                DMNExport.indent(subelem, level + 1)
+            if not elem.tail or not elem.tail.strip():
+                elem.tail = j
+        else:
+            if level and (not elem.tail or not elem.tail.strip()):
+                elem.tail = j
+        return elem
+
 
     ##############################################################
 
 
     @staticmethod
-    def generate_header(diagram):
-        DMNExport.XMLNamespaces.xmlns = diagram.xmlns
-        DMNExport.XMLNamespaces.xmlnsex = diagram.xmlnsex
+    def generate_header(model):
+        DMNExport.XMLNamespaces.xmlns = model.xmlns
+        DMNExport.XMLNamespaces.xmlns_ex = model.xmlns_ex
         DMNExport.root = Element('definitions', xmlns=DMNExport.XMLNamespaces.xmlns,
-                       nsmap={'ex': DMNExport.XMLNamespaces.xmlnsex},
-                       namespace=diagram.namespace, name=diagram.name, id=diagram.id)
-        if diagram.description != None:
+                       nsmap={'ex': DMNExport.XMLNamespaces.xmlns_ex},
+                       namespace = model.namespace, name = model.name, id = model.id)
+        if model.description != None:
             description = SubElement(DMNExport.root, 'description')
-            description.text = diagram.description
+            description.text = model.description
 
 
     ##############################################################
 
 
     @staticmethod
-    def generate_item_definition(parent, diagram):
-        for item_def in diagram.definition_list:
+    def generate_item_definition(parent, model):
+        for item_def in model.definition_list:
             item_def_se = SubElement(parent, 'itemDefinition', name = item_def.name, id = item_def.id)
             DMNExport.generate_item_component(item_def_se, item_def)
         
@@ -75,8 +99,8 @@ class DMNExport:
 
 
     @staticmethod
-    def generate_input_data(parent, diagram):
-        for input_data in diagram.get_all_elements_of_type('input data element'):
+    def generate_input_data(parent, model):
+        for input_data in model.get_all_elements_of_type(InputDataElement):
             input_data_se = DMNExport.generate_subelement_name_id(parent, 'inputData', input_data.name, input_data.id)
             var = DMNExport.generate_subelement_name_id(input_data_se, 'variable', input_data.variable.name, input_data.variable.id)
             var.attrib['typeRef'] = input_data.variable.type_ref_value
@@ -86,8 +110,8 @@ class DMNExport:
 
 
     @staticmethod
-    def generate_knowledge_source(parent, diagram):
-        for know_sour in diagram.get_all_elements_of_type('knowledge source element'):
+    def generate_knowledge_source(parent, model):
+        for know_sour in model.get_all_elements_of_type(KnowledgeSourceElement):
             DMNExport.generate_subelement_name_id(parent, 'knowledgeSource', know_sour.name, know_sour.id)
 
 
@@ -95,8 +119,8 @@ class DMNExport:
 
 
     @staticmethod
-    def generate_business_knowledge_model(parent, diagram):
-        for buss_know_model in diagram.get_all_elements_of_type('business knowledge model element'):
+    def generate_business_knowledge_model(parent, model):
+        for buss_know_model in model.get_all_elements_of_type(BusinessKnowledgeModelElement):
             buss_know_model_se = DMNExport.generate_subelement_name_id(parent, 'businessKnowledgeModel', buss_know_model.name, buss_know_model.id)
             encapsulated_logic_se = DMNExport.generate_subelement(buss_know_model_se, 'encapsulatedLogic')
             DMNExport.generate_formal_parameters(encapsulated_logic_se, buss_know_model)
@@ -124,8 +148,8 @@ class DMNExport:
 
 
     @staticmethod
-    def generate_decision(parent, diagram):
-        for decision in diagram.get_all_elements_of_type('decision element'):
+    def generate_decision(parent, model):
+        for decision in model.get_all_elements_of_type(DecisionElement):
             decision_se = DMNExport.generate_subelement_name_id(DMNExport.root, 'decision', decision.name, decision.id)
             if decision.description != None:
                 DMNExport.generate_subelement_text(decision_se, 'description', decision.description)
@@ -171,9 +195,9 @@ class DMNExport:
     def generate_information_requirements(parent, elem):
         try:
             for requirement in elem.information_requirement_list:
-                if requirement.type == 'input data element':
+                if isinstance(requirement, InputDataElement):
                     DMNExport.generate_requirement(parent, requirement, 'information', 'Input')
-                # required information is bkm or decision output
+                # required information is bkm's or decision's output
                 else:
                     DMNExport.generate_requirement(parent, requirement, 'information', 'Decision')
         except AttributeError:
@@ -191,7 +215,7 @@ class DMNExport:
     def generate_requirement(parent, requirement, what_requirement, required_what):
         requirement_se = DMNExport.generate_subelement(parent, what_requirement + "Requirement")
         required_se = DMNExport.generate_subelement(requirement_se, "required" + required_what)
-        required_se.attrib['href'] = requirement.id
+        required_se.attrib['href'] = '#' + requirement.id
 
 
     ##############################################################
@@ -216,20 +240,20 @@ class DMNExport:
                     input_se.attrib['label'] = input.label
                 if input.expression != None:
                     DMNExport.generate_subelement_with_text_subelement(input_se, 'inputExpression', input.expression)
-                if input.values != None:
-                    DMNExport.generate_subelement_with_text_subelement(input_se, 'inputValues', html.unescape(input.values))
+                if input.allowed_values != None:
+                    DMNExport.generate_subelement_with_text_subelement(input_se, 'inputValues', html.unescape(input.allowed_values))
             try:
                 output_se = DMNExport.generate_subelement_name(decision_table_se, 'output', decision_table.output.name)
-                if decision_table.output.values != None:
-                    DMNExport.generate_subelement_with_text_subelement(output_se, 'outputValues', html.unescape(decision_table.output.values))
+                if decision_table.output.allowed_values != None:
+                    DMNExport.generate_subelement_with_text_subelement(output_se, 'outputValues', html.unescape(decision_table.output.allowed_values))
             except KeyError:
                 raise KeyError('Decision table must have an output')
             for rule in decision_table.rule_list:
                 rule_se = DMNExport.generate_subelement(decision_table_se, 'rule')
                 for rule_input in rule.input_list:
-                    DMNExport.generate_subelement_with_text_subelement(rule_se, 'inputEntry', html.unescape(rule_input.value))
+                    DMNExport.generate_subelement_with_text_subelement(rule_se, 'inputEntry', html.unescape(rule_input))
                 try:
-                    DMNExport.generate_subelement_with_text_subelement(rule_se, 'outputEntry', html.unescape(rule.output).replace('"', ''))
+                    DMNExport.generate_subelement_with_text_subelement(rule_se, 'outputEntry', html.unescape(rule.output))
                 except KeyError:
                     raise KeyError('Decision table rule must have an outputEntry')
 
@@ -290,4 +314,4 @@ class DMNExport:
     @staticmethod
     def generate_subelement_with_text_subelement(parent, tag, text):
         se = DMNExport.generate_subelement(parent, tag)
-        text_se = DMNExport.generate_subelement_text(se, 'text', text)
+        DMNExport.generate_subelement_text(se, 'text', text)

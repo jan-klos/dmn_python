@@ -1,14 +1,14 @@
 class DecisionTable():
     __slots__ = ['id', 'aggregation', 'input_list', 'output', 'rule_list', '_hit_policy', '_preferred_orientation']
 
-    def __init__(self, id, hit_policy, preferred_orientation, aggregation):
+    def __init__(self, id = None, hit_policy = None, preferred_orientation = None, aggregation = None, input_list = [], output = None, rule_list = []):
         self.id = id
         self._hit_policy = hit_policy
         self._preferred_orientation = preferred_orientation.upper()
         self.aggregation = aggregation
-        self.input_list = None
-        self.output = None
-        self.rule_list = None
+        self.input_list = input_list
+        self.output = output
+        self.rule_list = rule_list
 
     @property
     def hit_policy(self):
@@ -34,45 +34,35 @@ class DecisionTable():
         elif preferred_orientation.upper() in ('RULE-AS-ROW', 'RULE-AS-COLUMN', 'CROSSTABLE'):
             self._preferred_orientation = preferred_orientation.upper()
         else:
-            raise Exception('The value of a preferred_orientation must be one of the following: RULE-AS-ROW, RULE-AS-COLUMN, CROSSTABLE')
+            raise ValueError('The value of preferred_orientation must be one of the following: RULE-AS-ROW, RULE-AS-COLUMN, CROSSTABLE')
 
 
 
 class DecisionTableInput():
-    __slots__ = ['label', 'expression', 'values']
+    __slots__ = ['label', 'expression', 'allowed_values']
 
-    def __init__(self, label, expression, values):
+    def __init__(self, label = None, expression = None, allowed_values = None):
         self.label = label
         self.expression = expression
-        self.values = values
+        self.allowed_values = allowed_values
 
 
 
 class DecisionTableOutput():
-    __slots__ = ['name', 'values']
+    __slots__ = ['name', 'allowed_values']
 
-    def __init__(self, name, values):
+    def __init__(self, name = None, allowed_values = None):
         self.name = name
-        self.values = values
+        self.allowed_values = allowed_values
 
 
 
 class Rule():
     __slots__ = ['input_list', 'output']
 
-    def __init__(self,):
-        self.input_list = None
-        self.output = None
-
-
-
-class RuleInput():
-    # label - with which DecisionTableInput associated
-    __slots__ = ['label', 'value']
-
-    def __init__(self, label, value):
-        self.label = label
-        self.value = value
+    def __init__(self, input_list = [], output = None):
+        self.input_list = input_list
+        self.output = output
 
 
 ############################################################################
@@ -81,8 +71,8 @@ class RuleInput():
 class Context:
     __slots__ = ['context_entry_list']
 
-    def __init__(self):
-        self.context_entry_list = None
+    def __init__(self, context_entry_list = None):
+        self.context_entry_list = context_entry_list
 
 
 

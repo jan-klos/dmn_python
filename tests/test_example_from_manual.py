@@ -5,12 +5,11 @@ import os
 
 example_from_manual_path = 'examples/exampleFromManual.xml'
 
-diagram = DMNImport.load_diagram_from_xml(os.path.abspath(example_from_manual_path))
-DMNExport.export_to_xml(diagram)
-DMNVisualisation.display_diagram(diagram)
+model = DMNImport.load_model_from_xml(os.path.abspath(example_from_manual_path))
+DMNExport.export_model_to_xml(model)
+DMNVisualisation.display_diagram(model)
 
-for element in diagram.element_list:
-    try:
-        DMNVisualisation.print_decision_table(diagram.get_element_by_name(element.name))
-    except AttributeError:
-        pass
+# displaying all decision tables
+for element in model.element_list:
+    if hasattr(element, 'decision_table') and element.decision_table != None:
+            DMNVisualisation.print_decision_table(model.get_element_by_name(element.name))

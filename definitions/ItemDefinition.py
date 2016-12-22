@@ -4,10 +4,10 @@
 class ItemDefinition:
     __slots__ = ['id', 'name', 'item_component_list', 'type_ref_xmlns', 'type_ref', 'allowed_values']  # allowed attributes
 
-    def __init__(self):
-        self.id = None
-        self.name = None
-        self.item_component_list = []
-        self.type_ref_xmlns = None
-        self.type_ref = None
-        self.allowed_values = None
+    def __init__(self, id = None, name = None, item_component_list = [], type_ref_xmlns = None, type_ref = None, allowed_values = None):
+        self.id = id
+        self.name = name
+        self.item_component_list = item_component_list
+        self.type_ref_xmlns = type_ref_xmlns
+        self.type_ref = type_ref
+        self.allowed_values = allowed_values
