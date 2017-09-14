@@ -1,5 +1,5 @@
 from lxml.etree import *
-from definitions.Elements import InputDataElement, BusinessKnowledgeModelElement, DecisionElement, KnowledgeSourceElement
+from dmn_python.definitions.Elements import InputDataElement, BusinessKnowledgeModelElement, DecisionElement, KnowledgeSourceElement
 import uuid, html, time, os
 import xml.etree.ElementTree as ET
 

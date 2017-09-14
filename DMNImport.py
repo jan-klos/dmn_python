@@ -1,9 +1,9 @@
 from xml.dom import minidom
-from definitions.Elements import *
-from definitions.Model import Model
-from definitions.ItemDefinition import ItemDefinition
-from definitions.Requirements import *
-from definitions.Logic import *
+from dmn_python.definitions.Elements import *
+from dmn_python.definitions.Model import Model
+from dmn_python.definitions.ItemDefinition import ItemDefinition
+from dmn_python.definitions.Requirements import *
+from dmn_python.definitions.Logic import *
 
 class DMNImport:
 

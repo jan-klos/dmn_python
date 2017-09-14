@@ -1,8 +1,8 @@
 from tabulate import tabulate
 import html, time, uuid, os
 import graphviz as gv
-from definitions.Elements import InputDataElement, BusinessKnowledgeModelElement, DecisionElement, KnowledgeSourceElement
-from definitions.Requirements import InformationRequirement, KnowledgeRequirement, AuthorityRequirement
+from dmn_python.definitions.Elements import InputDataElement, BusinessKnowledgeModelElement, DecisionElement, KnowledgeSourceElement
+from dmn_python.definitions.Requirements import InformationRequirement, KnowledgeRequirement, AuthorityRequirement
 
 class DMNVisualisation:
     path_to_img = os.path.dirname(os.path.abspath(__file__)) + '/img/'

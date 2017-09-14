@@ -6,14 +6,14 @@
 
     setup(
         name = "dmn_python",
-        version = "0.1.0",
+        version = "0.1.3",
         author = "Jan Klos",
         author_email = "janklos@protonmail.com",
         description = ("Python library enabling importing and exporting a DMN model (as an XML file) and visualizating it."),
         license = "GNU GENERAL PUBLIC LICENSE",
         keywords = ["dmn", "xml"],
         url = "https://github.com/jan-klos/dmn-python",
-        download_url="https://github.com/jan-klos/dmn-python/tarball/0.1.0",
+        download_url="https://github.com/jan-klos/dmn-python/tarball/0.1.3",
         packages=['dmn_python'],
         install_requires=[
             'lxml',
