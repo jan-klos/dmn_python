@@ -1,6 +1,6 @@
-from DMNImport import DMNImport
-from DMNVisualisation import DMNVisualisation
-from DMNExport import DMNExport
+from dmn_python.DMNImport import DMNImport
+from dmn_python.DMNVisualisation import DMNVisualisation
+from dmn_python.DMNExport import DMNExport
 import os
 
 example_from_manual_path = 'examples/exampleFromManual.xml'

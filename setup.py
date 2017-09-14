@@ -6,7 +6,7 @@ def read(fname):
 
 setup(
     name = "dmn_python",
-    version = "0.1.3",
+    version = "0.1.4",
     author = "Jan Klos",
     author_email = "janklos@protonmail.com",
     description = ("Python library enabling importing and exporting a DMN model (as an XML file) and visualizating it."),

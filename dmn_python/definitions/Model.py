@@ -1,4 +1,4 @@
-from definitions.Requirements import *
+from dmn_python.definitions.Requirements import *
 
 class Model:
     __slots__ = ['id', 'name', 'namespace', 'xmlns', 'xmlns_ex', 'description', 'element_list', 'requirement_list', 'definition_list']
