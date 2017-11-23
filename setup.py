@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
     ],
-    url = "https://github.com/jan-klos/dmn-python",
+    url = "https://github.com/jan-klos/dmn_python",
     packages = ['dmn_python'],
     install_requires = [
         'lxml',
